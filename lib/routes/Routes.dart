@@ -7,7 +7,6 @@ final routes = {
 
 final onGenerateRoute = (RouteSettings settings) {
   final String name = settings.name;
-  print(settings);
   final Function pageContentBuilder = routes[name];
   if (pageContentBuilder != null) {
     if (settings.arguments != null) {

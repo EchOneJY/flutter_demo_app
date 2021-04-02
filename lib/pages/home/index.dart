@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mk_flutter_app/api/queue.dart';
+import 'package:mk_flutter_app/models/queue_info.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -8,7 +10,48 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> lineNames = ['北京市海淀区第三中路', '北京市海淀区中关村软件园'];
+  QueueInfoModel _mapQueueInfo = new QueueInfoModel();
+  int _queueStatus;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _queryQueueInfo();
+  }
+
+  _queryQueueInfo() async {
+    final res = await queryQueueInfo();
+    print(res['status']);
+    if (res['status'] == 0) {
+      setState(() {
+        print(_mapQueueInfo.runtimeType.toString());
+        _mapQueueInfo = QueueInfoModel.fromJson(res['result']);
+        _queueStatus = _mapQueueInfo.queueStatus;
+      });
+    }
+  }
+
+  _formatQueueStatus(status) {
+    switch (status) {
+      case 0:
+        return '待排队';
+        break;
+      case 1:
+        return '排队中';
+      case 2:
+        return '进厂中';
+      case 3:
+        return '已进厂';
+      case 4:
+        return '已取消';
+      default:
+        return '';
+    }
+  }
+
+  _onPress() {}
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +80,28 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.all(Radius.circular(15))),
-                child: Column(children: [_queueLine()])),
+                child: Column(children: [
+                  _queueLine(), //排队路线
+                  _queueDetail(), //排队详情
+                  Container(
+                      width: 200,
+                      height: 50,
+                      margin: EdgeInsets.only(top: 50),
+                      child: RaisedButton(
+                        onPressed: _onPress,
+                        child: Text('取消排队'),
+                        textColor: Colors.white,
+                        color: Color(0xffFF7100),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50)),
+                        elevation: 2,
+                      ))
+                ])),
           )),
     );
   }
 
-  _queueLine() {
+  Widget _queueLine() {
     return Container(
         width: double.infinity,
         height: 150,
@@ -93,14 +152,16 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          // SizedBox(height: 20),
-          Column(
-            children: lineNames.map((name) => _lineItem(context, name)),
-          )
+          SizedBox(height: 20),
+          Column(children: [
+            _lineItem('北京市海淀区第三中路', 0),
+            SizedBox(height: 12),
+            _lineItem('北京市海淀区中关村软件园', 1),
+          ])
         ]));
   }
 
-  Widget _lineItem(BuildContext context, String name) {
+  Widget _lineItem(String name, int index) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -109,7 +170,8 @@ class _HomePageState extends State<HomePage> {
           height: 7,
           margin: EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
-              color: Color(0xff00ABFF), borderRadius: BorderRadius.circular(7)),
+              color: Color(index == 0 ? 0xff00ABFF : 0xffFF7100),
+              borderRadius: BorderRadius.circular(7)),
         ),
         Text(name),
         SizedBox(width: 10),
@@ -118,6 +180,77 @@ class _HomePageState extends State<HomePage> {
           width: 16,
           height: 16,
         )
+      ],
+    );
+  }
+
+  Widget _queueDetail() {
+    return Container(
+        padding: EdgeInsets.only(top: 30, left: 35, right: 20),
+        child: Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _queueNumber(), //排队号码
+              _queueInfo() //排队详情
+            ],
+          ),
+        ]));
+  }
+
+  Widget _queueNumber() {
+    return Column(children: [
+      Text(
+        '排队号码',
+        style: TextStyle(color: Color(0xffA1A5B2), fontSize: 12),
+      ),
+      SizedBox(height: 12),
+      Text(_mapQueueInfo.allocateNum.toString(),
+          style: TextStyle(fontSize: 36, color: Color(0xff414B67)))
+    ]);
+  }
+
+  Widget _queueInfo() {
+    return Column(
+      children: [
+        _queueInfoItem('前面等待', _mapQueueInfo.waitingNumber.toString(), null),
+        SizedBox(height: 8),
+        _queueInfoItem('车牌号码', _mapQueueInfo.vno, null),
+        SizedBox(height: 8),
+        _queueInfoItem('排队状态', _formatQueueStatus(_queueStatus),
+            1), //_formatQueueStatus(_mapQueueInfo.queueStatus)
+      ],
+    );
+  }
+
+  Widget _queueInfoItem(String label, String value, int state) {
+    Widget valueText;
+    if (state != null) {
+      valueText = Container(
+          margin: EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: state == 0 ? Color(0xff00A7F9) : Color(0xffFF7100)),
+          child: Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ));
+    } else {
+      valueText = Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Color(0xff414B67), fontSize: 12),
+      );
+    }
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Color(0xffA1A5B2), fontSize: 12),
+        ),
+        Container(
+            width: 70, margin: EdgeInsets.only(left: 20), child: valueText)
       ],
     );
   }
