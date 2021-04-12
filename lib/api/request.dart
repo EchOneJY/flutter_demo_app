@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
 class HttpRequest {
@@ -12,15 +13,20 @@ class HttpRequest {
       http.Response response = await http.get(baseUrl + uri, headers: headers);
       final statusCode = response.statusCode;
       final body = response.body;
-      // print('[uri=$uri][statusCode=$statusCode][response=$body]');
       if (statusCode == 200) {
-        return jsonDecode(body);
+        final res = jsonDecode(body);
+        if (res['status'] == 0) {
+          return res['result'];
+        } else {
+          EasyLoading.showToast(res['message'] ??= '接口请求错误');
+        }
       } else {
-        throw Exception('请求错误');
+        EasyLoading.instance..displayDuration = const Duration(seconds: 10);
+        EasyLoading.showToast('接口请求错误,错误码：$statusCode');
       }
     } on Exception catch (e) {
-      print('[uri=$uri]exception e=${e.toString()}');
-      return '';
+      EasyLoading.instance..displayDuration = const Duration(seconds: 10);
+      EasyLoading.showToast('接口请求错误:$e');
     }
   }
 }

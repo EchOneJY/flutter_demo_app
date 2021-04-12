@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class QueueInfoModel {
   final int queueStatus;
   final int allocateNum;

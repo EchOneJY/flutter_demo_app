@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mk_flutter_app/pages/home/index.dart';
+import 'package:mk_flutter_app/pages/home/queue_page.dart';
 import 'package:mk_flutter_app/pages/map/index.dart';
 import 'package:mk_flutter_app/pages/me/index.dart';
 

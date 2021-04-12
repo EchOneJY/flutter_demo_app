@@ -10,12 +10,7 @@ class MePage extends StatelessWidget {
         appBar: AppBar(
           title: Text('我的'),
         ),
-        body: RaisedButton(
-          child: Text('to form'),
-          onPressed: () => {
-            Navigator.of(context).pushNamed('/form', arguments: {'id': '123'})
-          },
-        ),
+        body: Center(child: Text('我的')),
       ),
     );
   }

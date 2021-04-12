@@ -10,14 +10,7 @@ class MapPage extends StatelessWidget {
           appBar: AppBar(
             title: Text('地图'),
           ),
-          body: Column(
-            children: [
-              RaisedButton(
-                child: Text('to tabs'),
-                onPressed: () => {Navigator.of(context).pushNamed('/')},
-              ),
-            ],
-          )),
+          body: Center(child: Text('地图'))),
     );
   }
 }
